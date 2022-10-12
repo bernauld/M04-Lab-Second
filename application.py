@@ -5,47 +5,48 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 db = SQLAlchemy(app)
 
-# id, name, and description for each drink
-class Drink(db.Model):
+# id, name, and description for each book
+class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    description = db.Column(db.String(120))
+    book_name = db.Column(db.String(80), unique=True, nullable=False)
+    author = db.Column(db.String(80), unique=True, nullable=False)
+    publisher = db.Column(db.String(80), unique=True, nullable=False)
 
     def __repr__(self):
-        return f"{self.name} - {self.description}"
+        return f"{self.id} - {self.book_name} - {self.author} - {self.publisher}"
 
 @app.route('/')
 def index():
-    return 'Welcome to the Drinks API!'
+    return 'Welcome to the Books API!'
 
-@app.route('/drinks')
-def get_drinks():
+@app.route('/books')
+def get_books():
     output = []
-    drinks = Drink.query.all()
+    books = Book.query.all()
 
-    for drink in drinks:
-        drink_data = {'name': drink.name, 'description': drink.description}
-        output.append(drink_data)
-    return {"drinks": output}
+    for book in books:
+        book_data = {'id': book.id, 'book_name': book.book_name, 'author': book.author, 'publisher': book.publisher}
+        output.append(book_data)
+    return {"books": output}
 
-@app.route('/drinks/<id>')
-def get_drink(id):
-    drink = Drink.query.get_or_404(id)
-    return {'name': drink.name, 'description': drink.description}
+@app.route('/books/<id>')
+def get_book(id):
+    book = Book.query.get_or_404(id)
+    return {'id': book.id, 'book_name': book.book_name, 'author': book.author, 'publisher': book.publisher}
 
-@app.route('/drinks', methods=['POST'])
-def add_drink():
-    drink = Drink(name= request.json['name'], description= request.json['description'])
-    db.session.add(drink)
+@app.route('/books', methods=['POST'])
+def add_book():
+    book = Book(id= request.json['id'], book_name= request.json['book_name'], author= request.json['author'], publisher= request.json['publisher'],)
+    db.session.add(book)
     db.session.commit()
-    return {'id': drink.id}
+    return {'id': book.id}
 
-@app.route('/drinks/<id>', methods=['DELETE'])
-def delete_drink(id):
-    drink = Drink.query.get(id)
-    if drink is None:
+@app.route('/books/<id>', methods=['DELETE'])
+def delete_book(id):
+    book = Book.query.get(id)
+    if book is None:
         return {"error": "404 not found"}
     else:
-        db.session.delete(drink)
+        db.session.delete(book)
         db.session.commit()
         return {"message": "sucessfully deleted"}
